@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Customs Tariff Calculator (BD 2025-26)</title>
+    <style>
+        :root {
+            --primary-green: #10b981;
+            --secondary-blue: #3b82f6;
+            --dark-navy: #0f172a;
+            --light-gray: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            color: #1e293b;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark-navy);
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #0da271;
+        }
+
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #ecfdf5;
+            border-left: 4px solid var(--primary-green);
+            border-radius: 6px;
+            display: none;
+        }
+
+        .result h2 {
+            margin-bottom: 1rem;
+            color: var(--dark-navy);
+        }
+
+        .tax-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .total {
+            font-weight: bold;
+            border-top: 1px dashed #10b981;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Customs Tariff Calculator (FY 2025-26)</h1>
+        <div class="input-group">
+            <label for="searchInput">Enter HS Code or Tariff Description:</label>
+            <input type="text" id="searchInput" placeholder="e.g., 48119021 or 'Insulated paper'">
+        </div>
+        <div class="input-group">
+            <label for="assessableValue">Assessable Value (BDT):</label>
+            <input type="number" id="assessableValue" placeholder="Enter value in BDT" min="0" step="any">
+        </div>
+        <button onclick="calculateTariff()">Calculate Total Tax & Duties</button>
+
+        <div class="result" id="resultBox">
+            <h2>Tariff Breakdown</h2>
+            <div class="tax-row"><span>HS Code:</span><span id="res-hscode"></span></div>
+            <div class="tax-row"><span>Description:</span><span id="res-desc"></span></div>
+            <div class="tax-row"><span>CD (%):</span><span id="res-cd"></span></div>
+            <div class="tax-row"><span>SD (Fixed or %):</span><span id="res-sd"></span></div>
+            <div class="tax-row"><span>VAT (%):</span><span id="res-vat"></span></div>
+            <div class="tax-row"><span>AIT (%):</span><span id="res-ait"></span></div>
+            <div class="tax-row"><span>RD (%):</span><span id="res-rd"></span></div>
+            <div class="tax-row"><span>AT (%):</span><span id="res-at"></span></div>
+            <div class="tax-row total"><span>Total Tax & Duties (BDT):</span><span id="res-total"></span></div>
+            <div class="tax-row total"><span>Total Payable (BDT):</span><span id="res-payable"></span></div>
+        </div>
+    </div>
+
+    <script>
+        // Tariff data from provided PDF (partial but representative)
+        const tariffData = [
+            { hs: "48119021", desc: "Insulated paper", cd: 10, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
+            { hs: "48119029", desc: "Excl. Insulated paper imp. by VAT reg. electric fan/water pump motor manf. Ind.", cd: 10, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
+            { hs: "48119030", desc: "Base paper for melamine", cd: 5, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
+            { hs: "48119090", desc: "Other Paper,Paperboard,Cellulose Wadding And Webs Of Cellulose Fibres,Nes", cd: 25, sd: 0, vat: 15, ait: 5, rd: 3, at: 5 },
+            { hs: "48120000", desc: "Filter Blocks, Slabs And Plates, Of Paper Pulp", cd: 10, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
+            { hs: "48131000", desc: "In the form of booklets or tubes", cd: 25, sd: 300, vat: 15, ait: 5, rd: 3, at: 5 },
+            { hs: "33030000", desc: "Perfumes And Toilet Waters", cd: 25, sd: 30, vat: 15, ait: 20, rd: 20, at: 5 },
+            { hs: "33041000", desc: "Lip Make-Up Preparations", cd: 25, sd: 45, vat: 15, ait: 5, rd: 20, at: 5 },
+            { hs: "29152100", desc: "Acetic Acid", cd: 25, sd: 0, vat: 15, ait: 5, rd: 3, at: 5 },
+            { hs: "87019210", desc: "Other Tracktor, of an engine power Exceeding 18 kW but not exceeding 37 kW", cd: 1, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
+            { hs: "72042900", desc: "Waste and scrap of alloy steel(excl. stainless)", cd: 0, sd: 0, vat: 1800, ait: 600, rd: 0, at: 5 },
+            { hs: "03063110", desc: "Rock lobster and other sea crawfish(Palinurus spp., Panulirus spp., Jasus spp.)", cd: 0, sd: 0, vat: 0, ait: 0, rd: 0, at: 5 },
+            { hs: "98010031", desc: "Air cond.machine; refrigerators or freezers; dish washer/washing machine/clothd Dryer", cd: 7000, sd: 0, vat: 0, ait: 5, rd: 0, at: 5 },
+            { hs: "22030000", desc: "Beer Made From Malt", cd: 25, sd: 250, vat: 15, ait: 5, rd: 3, at: 5 },
+            { hs: "17019900", desc: "Cane Or Beet Sugar, In Solid Form, Nes Including Chemically Kue Sucoose", cd: 4000, sd: 0, vat: 15, ait: 5, rd: 15, at: 5 }
+        ];
+
+        function calculateTariff() {
+            const input = document.getElementById('searchInput').value.trim().toLowerCase();
+            const assessableValue = parseFloat(document.getElementById('assessableValue').value);
+
+            if (!input) {
+                alert("Please enter HS Code or Tariff Description.");
+                return;
+            }
+            if (isNaN(assessableValue) || assessableValue <= 0) {
+                alert("Please enter a valid Assessable Value.");
+                return;
+            }
+
+            let item = null;
+
+            // Try exact HS match first
+            if (/^\d+$/.test(input)) {
+                item = tariffData.find(d => d.hs === input);
+            }
+
+            // If not found, try partial description match
+            if (!item) {
+                item = tariffData.find(d =>
+                    d.desc.toLowerCase().includes(input) ||
+                    input.includes(d.hs)
+                );
+            }
+
+            const resultBox = document.getElementById('resultBox');
+            if (!item) {
+                resultBox.style.display = 'block';
+                document.getElementById('res-hscode').textContent = "—";
+                document.getElementById('res-desc').textContent = "No matching tariff found.";
+                document.getElementById('res-cd').textContent = "—";
+                document.getElementById('res-sd').textContent = "—";
+                document.getElementById('res-vat').textContent = "—";
+                document.getElementById('res-ait').textContent = "—";
+                document.getElementById('res-rd').textContent = "—";
+                document.getElementById('res-at').textContent = "—";
+                document.getElementById('res-total').textContent = "—";
+                document.getElementById('res-payable').textContent = "—";
+                return;
+            }
+
+            // Parse rates
+            const cdRate = item.cd || 0;
+            const sdVal = item.sd || 0;
+            const vatRate = item.vat || 0;
+            const aitRate = item.ait || 0;
+            const rdRate = item.rd || 0;
+            const atRate = item.at || 0;
+
+            // CD is % of assessable value
+            const cdAmount = (cdRate / 100) * assessableValue;
+            // SD can be fixed or % — here treated as fixed if >100, else %
+            const sdAmount = (sdVal > 100) ? sdVal : (sdVal / 100) * assessableValue;
+            // Customs Value = Assessable + CD + SD
+            const customsValue = assessableValue + cdAmount + sdAmount;
+            // VAT, AIT, RD, AT are % of customs value
+            const vatAmount = (vatRate / 100) * customsValue;
+            const aitAmount = (aitRate / 100) * customsValue;
+            const rdAmount = (rdRate / 100) * customsValue;
+            const atAmount = (atRate / 100) * customsValue;
+
+            const totalTax = cdAmount + sdAmount + vatAmount + aitAmount + rdAmount + atAmount;
+            const totalPayable = assessableValue + totalTax;
+
+            // Display
+            document.getElementById('res-hscode').textContent = item.hs;
+            document.getElementById('res-desc').textContent = item.desc;
+            document.getElementById('res-cd').textContent = `${cdRate}% → BDT ${cdAmount.toFixed(2)}`;
+            document.getElementById('res-sd').textContent = (sdVal > 100 ? `Fixed BDT ${sdVal}` : `${sdVal}%`) + ` → BDT ${sdAmount.toFixed(2)}`;
+            document.getElementById('res-vat').textContent = `${vatRate}% → BDT ${vatAmount.toFixed(2)}`;
+            document.getElementById('res-ait').textContent = `${aitRate}% → BDT ${aitAmount.toFixed(2)}`;
+            document.getElementById('res-rd').textContent = `${rdRate}% → BDT ${rdAmount.toFixed(2)}`;
+            document.getElementById('res-at').textContent = `${atRate}% → BDT ${atAmount.toFixed(2)}`;
+            document.getElementById('res-total').textContent = `BDT ${totalTax.toFixed(2)}`;
+            document.getElementById('res-payable').textContent = `BDT ${totalPayable.toFixed(2)}`;
+
+            resultBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+
