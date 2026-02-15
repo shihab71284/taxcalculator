@@ -27,7 +27,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             padding: 2rem;
@@ -39,6 +39,23 @@
             text-align: center;
             color: var(--dark-navy);
             margin-bottom: 1.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--secondary-blue);
+            font-weight: 600;
+        }
+
+        .error {
+            text-align: center;
+            padding: 1rem;
+            color: #ef4444;
+            background-color: #fee2e2;
+            border-radius: 6px;
+            margin: 1rem 0;
+            display: none;
         }
 
         .input-group {
@@ -59,6 +76,26 @@
             font-size: 1rem;
         }
 
+        .suggestions {
+            border: 1px solid var(--border-color);
+            border-top: none;
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 0 0 6px 6px;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--light-gray);
+        }
+
         button {
             background-color: var(--primary-green);
             color: white;
@@ -74,6 +111,11 @@
 
         button:hover {
             background-color: #0da271;
+        }
+
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
         }
 
         .result {
@@ -102,39 +144,60 @@
             padding-top: 0.5rem;
             margin-top: 0.5rem;
         }
+
+        .stats {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #64748b;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Customs Tariff Calculator (FY 2025-26)</h1>
-        <div class="input-group">
-            <label for="searchInput">Enter HS Code or Tariff Description:</label>
-            <input type="text" id="searchInput" placeholder="e.g., 48119021 or 'Insulated paper'">
-        </div>
-        <div class="input-group">
-            <label for="assessableValue">Assessable Value (BDT):</label>
-            <input type="number" id="assessableValue" placeholder="Enter value in BDT" min="0" step="any">
-        </div>
-        <button onclick="calculateTariff()">Calculate Total Tax & Duties</button>
+        
+        <div class="loading" id="loading">Loading tariff data from Google Sheets...</div>
+        <div class="error" id="error"></div>
+        
+        <div id="mainContent" style="display: none;">
+            <div class="input-group">
+                <label for="searchInput">Enter HS Code or Tariff Description:</label>
+                <input type="text" id="searchInput" placeholder="e.g., 48119021 or 'Insulated paper'" autocomplete="off">
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+            <div class="input-group">
+                <label for="assessableValue">Assessable Value (BDT):</label>
+                <input type="number" id="assessableValue" placeholder="Enter value in BDT" min="0" step="any">
+            </div>
+            <button onclick="calculateTariff()" id="calculateBtn">Calculate Total Tax & Duties</button>
 
-        <div class="result" id="resultBox">
-            <h2>Tariff Breakdown</h2>
-            <div class="tax-row"><span>HS Code:</span><span id="res-hscode"></span></div>
-            <div class="tax-row"><span>Description:</span><span id="res-desc"></span></div>
-            <div class="tax-row"><span>CD (%):</span><span id="res-cd"></span></div>
-            <div class="tax-row"><span>SD (Fixed or %):</span><span id="res-sd"></span></div>
-            <div class="tax-row"><span>VAT (%):</span><span id="res-vat"></span></div>
-            <div class="tax-row"><span>AIT (%):</span><span id="res-ait"></span></div>
-            <div class="tax-row"><span>RD (%):</span><span id="res-rd"></span></div>
-            <div class="tax-row"><span>AT (%):</span><span id="res-at"></span></div>
-            <div class="tax-row total"><span>Total Tax & Duties (BDT):</span><span id="res-total"></span></div>
-            <div class="tax-row total"><span>Total Payable (BDT):</span><span id="res-payable"></span></div>
+            <div class="result" id="resultBox">
+                <h2>Tariff Breakdown</h2>
+                <div class="tax-row"><span>HS Code:</span><span id="res-hscode"></span></div>
+                <div class="tax-row"><span>Description:</span><span id="res-desc"></span></div>
+                <div class="tax-row"><span>CD (Customs Duty):</span><span id="res-cd"></span></div>
+                <div class="tax-row"><span>SD (Supplementary Duty):</span><span id="res-sd"></span></div>
+                <div class="tax-row"><span>VAT (Value Added Tax):</span><span id="res-vat"></span></div>
+                <div class="tax-row"><span>AIT (Advance Income Tax):</span><span id="res-ait"></span></div>
+                <div class="tax-row"><span>RD (Regulatory Duty):</span><span id="res-rd"></span></div>
+                <div class="tax-row"><span>AT (Advance Tax):</span><span id="res-at"></span></div>
+                <div class="tax-row total"><span>Total Tax & Duties (BDT):</span><span id="res-total"></span></div>
+                <div class="tax-row total"><span>Total Payable (BDT):</span><span id="res-payable"></span></div>
+            </div>
+            <div class="stats" id="stats"></div>
         </div>
     </div>
 
     <script>
-        // Tariff data from provided PDF (partial but representative)
-        const tariffData = [
+        let tariffData = [];
+        let isLoading = true;
+
+        // Google Sheets CSV URL (replace with your published CSV URL)
+        const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5oq5vunjn40wtJMr7Jc0slsUMY9x3966cAyQegabhWMssl4_QMli_QiVi_IxH99orfvP_MgwcP86g/pub?gid=1630460602&single=true&output=csv';
+        
+        // Fallback data in case Google Sheets fails to load
+        const FALLBACK_DATA = [
             { hs: "48119021", desc: "Insulated paper", cd: 10, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
             { hs: "48119029", desc: "Excl. Insulated paper imp. by VAT reg. electric fan/water pump motor manf. Ind.", cd: 10, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
             { hs: "48119030", desc: "Base paper for melamine", cd: 5, sd: 0, vat: 15, ait: 5, rd: 0, at: 5 },
@@ -152,7 +215,166 @@
             { hs: "17019900", desc: "Cane Or Beet Sugar, In Solid Form, Nes Including Chemically Kue Sucoose", cd: 4000, sd: 0, vat: 15, ait: 5, rd: 15, at: 5 }
         ];
 
+        // Load data from Google Sheets on page load
+        window.onload = async function() {
+            try {
+                await loadTariffData();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError('Failed to load tariff data. Using fallback data.');
+                tariffData = FALLBACK_DATA;
+                isLoading = false;
+                showMainContent();
+            }
+        };
+
+        async function loadTariffData() {
+            try {
+                const response = await fetch(GOOGLE_SHEETS_CSV_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                tariffData = parseCSV(csvText);
+                
+                if (tariffData.length === 0) {
+                    throw new Error('No data parsed from CSV');
+                }
+                
+                isLoading = false;
+                showMainContent();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                throw error;
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().toUpperCase());
+            
+            // Find column indices
+            const hsIndex = headers.findIndex(h => h === 'HSCODE');
+            const descIndex = headers.findIndex(h => h === 'TARRIFF_DESCRIPTION');
+            const cdIndex = headers.findIndex(h => h === 'CD');
+            const sdIndex = headers.findIndex(h => h === 'SD');
+            const vatIndex = headers.findIndex(h => h === 'VAT');
+            const aitIndex = headers.findIndex(h => h === 'AIT');
+            const rdIndex = headers.findIndex(h => h === 'RD');
+            const atIndex = headers.findIndex(h => h === 'AT');
+
+            if (hsIndex === -1 || descIndex === -1) {
+                throw new Error('Required columns not found in CSV');
+            }
+
+            const data = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Handle CSV parsing with quotes
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let char of line) {
+                    if (char === '"' && inQuotes) {
+                        inQuotes = false;
+                    } else if (char === '"' && !inQuotes) {
+                        inQuotes = true;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current); // Push last value
+
+                const hsCode = values[hsIndex]?.replace(/"/g, '').trim();
+                const description = values[descIndex]?.replace(/"/g, '').trim();
+
+                if (hsCode && description) {
+                    data.push({
+                        hs: hsCode,
+                        desc: description,
+                        cd: parseFloat(values[cdIndex]) || 0,
+                        sd: parseFloat(values[sdIndex]) || 0,
+                        vat: parseFloat(values[vatIndex]) || 0,
+                        ait: parseFloat(values[aitIndex]) || 0,
+                        rd: parseFloat(values[rdIndex]) || 0,
+                        at: parseFloat(values[atIndex]) || 0
+                    });
+                }
+            }
+
+            return data;
+        }
+
+        function showMainContent() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function updateStats() {
+            document.getElementById('stats').textContent = `Loaded ${tariffData.length} tariff entries`;
+        }
+
+        // Search functionality with suggestions
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsBox = document.getElementById('suggestions');
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim().toLowerCase();
+            if (query.length < 2) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            const matches = tariffData.filter(item => 
+                item.hs.toLowerCase().includes(query) || 
+                item.desc.toLowerCase().includes(query)
+            ).slice(0, 10);
+
+            if (matches.length > 0) {
+                suggestionsBox.innerHTML = '';
+                matches.forEach(match => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.textContent = `${match.hs} - ${match.desc.substring(0, 60)}${match.desc.length > 60 ? '...' : ''}`;
+                    div.onclick = function() {
+                        searchInput.value = match.hs;
+                        suggestionsBox.style.display = 'none';
+                    };
+                    suggestionsBox.appendChild(div);
+                });
+                suggestionsBox.style.display = 'block';
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!suggestionsBox.contains(e.target) && e.target !== searchInput) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
         function calculateTariff() {
+            if (isLoading) {
+                alert('Tariff data is still loading. Please wait...');
+                return;
+            }
+
             const input = document.getElementById('searchInput').value.trim().toLowerCase();
             const assessableValue = parseFloat(document.getElementById('assessableValue').value);
 
@@ -168,15 +390,12 @@
             let item = null;
 
             // Try exact HS match first
-            if (/^\d+$/.test(input)) {
-                item = tariffData.find(d => d.hs === input);
-            }
+            item = tariffData.find(d => d.hs === input);
 
             // If not found, try partial description match
             if (!item) {
                 item = tariffData.find(d =>
-                    d.desc.toLowerCase().includes(input) ||
-                    input.includes(d.hs)
+                    d.desc.toLowerCase().includes(input)
                 );
             }
 
@@ -206,7 +425,7 @@
 
             // CD is % of assessable value
             const cdAmount = (cdRate / 100) * assessableValue;
-            // SD can be fixed or % — here treated as fixed if >100, else %
+            // SD can be fixed or % — treat as fixed if >100, else %
             const sdAmount = (sdVal > 100) ? sdVal : (sdVal / 100) * assessableValue;
             // Customs Value = Assessable + CD + SD
             const customsValue = assessableValue + cdAmount + sdAmount;
@@ -236,4 +455,3 @@
     </script>
 </body>
 </html>
-
