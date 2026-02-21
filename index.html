@@ -1,317 +1,854 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Customs Tariff Calculator (BD FY 2025-26)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Import Duty and Tax Calculator | Estimate Customs Charges</title>
+    <meta name="description" content="Use our Import Duty and Tax Calculator to easily estimate insurance, freight, assessable value, customs duties and taxes for your imports. Get accurate calculations based on HS codes, trade terms, and more.">
+    <meta name="keywords" content="Import Duty and Tax Calculator, Duty Calculator, import duty, customs, tax calculation, Customs Tariff, customs duty, duty calculation">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://taxcalculator.bd/static/images/favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --primary-green: #10b981;
-            --secondary-blue: #3b82f6;
-            --dark-navy: #0f172a;
-            --light-gray: #f8fafc;
-            --border-color: #e2e8f0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         body {
-            background-color: var(--light-gray);
-            color: #1e293b;
-            padding: 2rem;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 50px 0px;
         }
-
-        h1 {
-            text-align: center;
-            color: var(--dark-navy);
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        input, select {
+        .calculator-container {
             width: 100%;
-            padding: 0.6rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
+            max-width: 700px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0 auto;
+            transition: all 0.4s ease;
         }
-
-        button {
-            background-color: var(--primary-green);
+        .calculator-container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #4a4a4a;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 32px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+        }
+        h1::after {
+            content: '';
+            display: block;
+            width: 50px;
+            height: 4px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            margin: 15px auto 0;
+            border-radius: 2px;
+        }
+        .outlined-field {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .outlined-field input,
+        .outlined-field select {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            color: #4a4a4a;
+        }
+        .outlined-field input:focus,
+        .outlined-field select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        .outlined-field label {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background-color: white;
+            padding: 0 8px;
+            font-size: 14px;
+            color: #9e9e9e;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .outlined-field input:focus + label,
+        .outlined-field select:focus + label,
+        .outlined-field input:not(:placeholder-shown) + label,
+        .outlined-field select:not([value=""]) + label {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 12px;
+            top: -20px;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 18px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+        #errorMessage {
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: rgba(255, 107, 107, 0.1);
+            display: none;
+        }
+        #loadingIndicator {
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            font-weight: 600;
+            display: none;
+        }
+        #results {
+            margin-top: 40px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        #results table {
             width: 100%;
-            margin-top: 1rem;
+            border-collapse: separate;
+            border-spacing: 0;
         }
-
-        button:hover {
-            background-color: #0da271;
+        #results th, #results td {
+            border: none;
+            padding: 16px;
+            text-align: left;
         }
-
-        .result {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background-color: #ecfdf5;
-            border-left: 4px solid var(--primary-green);
-            border-radius: 6px;
-            display: none;
+        #results th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
         }
-
-        .result h2 {
-            margin-bottom: 1rem;
-            color: var(--dark-navy);
+        #results td {
+            border-bottom: 1px solid #e0e0e0;
         }
-
-        .tax-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
+        #results tr:last-child td {
+            border-bottom: none;
         }
-
-        .total {
+        #results tr:nth-child(even) {
+            background-color: #f8f9ff;
+        }
+        #results tr:hover {
+            background-color: #e8ecfd;
+        }
+        #results td:first-child {
+            font-weight: 600;
+            color: #4a4a4a;
+        }
+        #results td:last-child {
+            text-align: right;
+            font-family: 'Roboto Mono', monospace;
+        }
+        #results .total-row {
             font-weight: bold;
-            border-top: 1px dashed #10b981;
-            padding-top: 0.5rem;
-            margin-top: 0.5rem;
+            background-color: #e8ecfd;
+        }
+        #results .total-row td {
+            border-top: 2px solid #667eea;
+        }
+        @media (max-width: 768px) {
+            .calculator-container { padding: 5px; }
+            h1 { font-size: 28px; }
+            .outlined-field input, .outlined-field select, button[type="submit"] { font-size: 16px; }
+            #results th, #results td { padding: 12px; }
         }
 
-        .status {
-            margin-top: 1rem;
-            padding: 0.5rem;
-            background: #fffbeb;
-            border-left: 3px solid #f59e0b;
-            font-size: 0.9rem;
-            display: none;
+        /* Header & Footer Styles */
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f9f9f9;
+            --text-color: #333;
+            --light-gray: #f4f4f4;
+            --dark-gray: #333;
+            --white: #fff;
+            --nav-bg: #0a192f;
+            --mobile-menu-bg: #1a2636;
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--background-color); color: var(--text-color); line-height: 1.6; }
+        .header {
+            background-color: var(--white);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .top-bar { background-color: var(--light-gray); padding: 4px 0; font-size: 14px; }
+        .top-bar-icon { color: var(--text-color); text-decoration: none; margin-right: 15px; transition: color 0.3s ease; }
+        .top-bar-icon:hover { color: var(--primary-color); }
+        .navbar { padding: 4px 0; background-color: var(--nav-bg); }
+        .navbar-brand { padding: 0; }
+        .logo-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .navbar-nav { margin-left: auto; }
+        .nav-item { margin: 0 5px; }
+        .nav-link {
+            color: var(--white) !important;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px !important;
+            transition: color 0.3s ease, background-color 0.3s ease;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-link:hover { color: var(--primary-color) !important; background-color: rgba(255, 255, 255, 0.1); }
+        .btn-outline-primary {
+            color: var(--white);
+            border-color: var(--white);
+            font-size: 14px;
+            padding: 6px 10px;
+            border-width: 2px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--white);
+            color: var(--dark-gray);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            background-color: var(--nav-bg);
+            color: var(--white);
+            padding: 50px 0 20px;
+        }
+        footer h5 { color: var(--white); margin-bottom: 20px; font-weight: 600; }
+        footer ul { padding-left: 0; list-style-type: none; }
+        footer ul li { margin-bottom: 10px; }
+        footer a { color: #bbb; text-decoration: none; transition: color 0.3s ease; }
+        footer a:hover { color: var(--white); }
+        .social-icons a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        .social-icons a:hover { background-color: var(--primary-color); transform: translateY(-3px); }
+        .mobile-nav { background-color: var(--nav-bg); border-top-left-radius: 15px; border-top-right-radius: 15px; box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1); }
+        .mobile-menu { background-color: var(--mobile-menu-bg); border-top-left-radius: 15px; border-top-right-radius: 15px; padding: 15px; }
+        .mobile-menu a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 10px 15px;
+            display: block;
+            transition: background-color 0.3s, transform 0.2s;
+            border-radius: 8px;
+        }
+        .mobile-menu a:hover { background-color: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
+        .mobile-nav-icons { display: flex; justify-content: space-around; padding: 10px 0; }
+        .mobile-nav-icon {
+            color: var(--white);
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .mobile-nav-icon:hover { transform: translateY(-3px); }
+        .mobile-nav-icon i { font-size: 1.5rem; margin-bottom: 5px; }
+        .mobile-nav-icon span { display: block; font-size: 0.75rem; }
+        .badge-floating {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.7rem;
+            padding: 2px 5px;
+        }
+        @media (max-width: 991.98px) {
+            .navbar-nav { background-color: var(--dark-gray); padding: 10px; border-radius: 5px; }
+            .nav-item { margin: 5px 0; }
+            .btn-outline-primary { display: block; width: 100%; text-align: center; margin-top: 10px; }
+        }
+        @media (max-width: 767.98px) {
+            .top-bar { text-align: center; }
+            .header { position: static; }
+            .main-content { margin-bottom: 70px; }
         }
     </style>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Import Duty and Tax Calculator",
+      "description": "Calculate assessable value, import duties and taxes for your international shipments",
+      "url": "https://www.taxcalculator.bd/duty-calculator",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "All",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "shihab71284@gmail.com",
+        "telephone": "+8801917179881",
+        "contactType": "customer support"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Customs Tariff Calculator (FY 2025-26)</h1>
-
-        <!-- CSV URL Input -->
-        <div class="input-group">
-            <label for="csvUrl">Enter Public CSV URL (Google Sheets):</label>
-            <input type="url" id="csvUrl" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv" 
-                   value="https://docs.google.com/spreadsheets/d/e/2PACX-1vTrBZSeQ-YGYBGz66IrcqooOmJ9ErQdDRj3iYqbgRw4hNRvjurOctn7lC83w4LCRtKQdhxsoXhYSEWf/pub?gid=2081232822&single=true&output=csv">
-            <button type="button" onclick="loadTariffData()">Load Tariff Data</button>
-            <div class="status" id="statusMsg"></div>
+    <!-- Header -->
+    <header class="header">
+        <div class="top-bar d-none d-md-block">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <span class="top-bar-icon">
+                            <i class="fas fa-phone-alt"></i>
+                            <a href="tel:+8801917179881" class="text-decoration-none text-dark">Call: +8801917179881</a>
+                        </span>
+                        <span class="top-bar-icon ms-3">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:shihab71284@gmail.com" class="text-decoration-none text-dark">shihab71284@gmail.com</a>
+                        </span>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="https://taxcalculator.bd/accounts/login/" class="top-bar-icon"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a href="https://taxcalculator.bd/accounts/signup" class="top-bar-icon"><i class="fas fa-user-plus"></i> Signup</a>
+                    </div>
+                </div>
+            </div>
         </div>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="https://taxcalculator.bd/">
+                    <span class="logo-text">Content Share</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"><i class="fas fa-bars text-white"></i></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="https://taxcalculator.bd/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://taxcalculator.bd/duty-calculator">Duty Calculator</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://taxcalculator.bd/income-tax-calculator">Income Tax Cal</a></li>
+                        <li class="nav-item"><a class="nav-link" href="https://taxcalculator.bd/search-result-vat/">VAT AI</a></li>
+                    </ul>
+                    <div class="ms-lg-2 mt-3 mt-lg-0 d-flex align-items-center">
+                        <a href="https://taxcalculator.bd/my-dashboard" class="btn btn-outline-primary me-2"><i class="fas fa-user"></i></a>
+                        <a href="https://taxcalculator.bd/my-wishlist" class="btn btn-outline-primary position-relative me-2">
+                            <i class="fas fa-heart"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                        </a>
+                        <a href="https://taxcalculator.bd/cart" class="btn btn-outline-primary position-relative">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">0</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-        <div class="input-group">
-            <label for="searchInput">Enter HS Code or Tariff Description:</label>
-            <input type="text" id="searchInput" placeholder="e.g., 48119021" disabled>
+    <!-- Mobile Navigation -->
+    <div class="d-md-none fixed-bottom mobile-nav">
+        <div class="collapse" id="mobileMenu">
+            <div class="mobile-menu">
+                <a href="https://taxcalculator.bd/"><i class="fas fa-home me-2"></i>Home</a>
+                <a href="https://taxcalculator.bd/duty-calculator"><i class="fas fa-calculator me-2"></i>Duty Calculator</a>
+                <a href="https://taxcalculator.bd/income-tax-calculator"><i class="fas fa-file-invoice-dollar me-2"></i>Income Tax Cal</a>
+                <a href="https://taxcalculator.bd/search-result-vat/"><i class="fas fa-search me-2"></i>VAT AI</a>
+            </div>
         </div>
-        <div class="input-group">
-            <label for="assessableValue">Assessable Value (BDT):</label>
-            <input type="number" id="assessableValue" placeholder="Enter value" min="0" step="any" disabled>
-        </div>
-        <button onclick="calculateTariff()" id="calcBtn" disabled>Calculate Total Tax & Duties</button>
-
-        <div class="result" id="resultBox">
-            <h2>Tariff Breakdown</h2>
-            <div class="tax-row"><span>HS Code:</span><span id="res-hscode"></span></div>
-            <div class="tax-row"><span>Description:</span><span id="res-desc"></span></div>
-            <div class="tax-row"><span>CD (%):</span><span id="res-cd"></span></div>
-            <div class="tax-row"><span>SD:</span><span id="res-sd"></span></div>
-            <div class="tax-row"><span>VAT (%):</span><span id="res-vat"></span></div>
-            <div class="tax-row"><span>AIT (%):</span><span id="res-ait"></span></div>
-            <div class="tax-row"><span>RD (%):</span><span id="res-rd"></span></div>
-            <div class="tax-row"><span>AT (%):</span><span id="res-at"></span></div>
-            <div class="tax-row total"><span>Total Tax & Duties (BDT):</span><span id="res-total"></span></div>
-            <div class="tax-row total"><span>Total Payable (BDT):</span><span id="res-payable"></span></div>
+        <div class="mobile-nav-icons">
+            <button class="btn text-white" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                <i class="fas fa-bars"></i><span class="d-block small mt-1">Menu</span>
+            </button>
+            <a href="https://taxcalculator.bd/my-dashboard" class="mobile-nav-icon"><i class="fas fa-user"></i><span>Profile</span></a>
+            <a href="https://taxcalculator.bd/my-wishlist" class="mobile-nav-icon position-relative">
+                <i class="fas fa-heart"></i><span>Wishlist</span>
+                <span class="badge bg-danger badge-floating">0</span>
+            </a>
+            <a href="https://taxcalculator.bd/cart" class="mobile-nav-icon position-relative">
+                <i class="fas fa-shopping-cart"></i><span>Cart</span>
+                <span class="badge bg-danger badge-floating cart-count">0</span>
+            </a>
         </div>
     </div>
 
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="main-content">
+                <div class="calculator-container">
+                    <h1>Import Duty and Tax Calculator</h1>
+                    <form id="calculatorForm">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="dummy-token">
+                        
+                        <div class="outlined-field">
+                            <input type="text" id="hsCode" name="hsCode" required pattern="\d+" placeholder=" " autocomplete="off">
+                            <label for="hsCode">HS Code</label>
+                        </div>
+                        
+                        <div class="outlined-field">
+                            <input type="text" id="description" name="description" readonly placeholder=" ">
+                            <label for="description">Description</label>
+                        </div>
+                        
+                        <div id="errorMessage"></div>
+                        <div id="loadingIndicator"><i class="fas fa-spinner fa-spin"></i> Loading tariff data...</div>
+                        
+                        <div class="outlined-field">
+                            <select id="tradeTerms" name="tradeTerms" required>
+                                <option value="" disabled selected> </option>
+                                <option value="FOB">FOB (Free on Board)</option>
+                                <option value="C&F">C&F (Cost and Freight)</option>
+                                <option value="CIF">CIF (Cost Insurance and Freight)</option>
+                            </select>
+                            <label for="tradeTerms">Trade Terms</label>
+                        </div>
+                        
+                        <div id="additionalFields"></div>
+                        <div id="extraadditionalFields"></div>
+                        
+                        <button type="submit"><i class="fas fa-calculator me-2"></i>Calculate Duty</button>
+                    </form>
+                    <div id="results"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5>About Us</h5>
+                    <p>Content Share is your go-to platform for accessing and sharing high-quality content. We connect creators and consumers in a vibrant, engaging community.</p>
+                    <p class="mt-3"><i class="fas fa-envelope me-2"></i> shihab71284@gmail.com<br>
+                       <i class="fas fa-phone me-2"></i> +8801917179881</p>
+                </div>
+                <div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+                    <h5>Quick Links</h5>
+                    <ul>
+                        <li><a href="https://taxcalculator.bd/">Home</a></li>
+                        <li><a href="https://taxcalculator.bd/category-list">Categories</a></li>
+                        <li><a href="https://taxcalculator.bd/brand-list">Authors</a></li>
+                        <li><a href="https://taxcalculator.bd/contact">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <h5>Newsletter</h5>
+                    <p>Stay updated with our latest content and offers.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed!');">
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control" placeholder="Enter your email" required>
+                            <button class="btn btn-primary" type="submit">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="mt-4 mb-3">
+            <div class="row">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <p>© 2026 Content Share. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end social-icons">
+                    <a href="#" class="text-light"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <script>
-        let tariffData = [];
-        const statusEl = document.getElementById('statusMsg');
-        const searchInput = document.getElementById('searchInput');
-        const assessableValue = document.getElementById('assessableValue');
-        const calcBtn = document.getElementById('calcBtn');
+    $(document).ready(function() {
+        // ===== CONFIGURATION =====
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTrBZSeQ-YGYBGz66IrcqooOmJ9ErQdDRj3iYqbgRw4hNRvjurOctn7lC83w4LCRtKQdhxsoXhYSEWf/pub?gid=2081232822&single=true&output=csv";
+        const CACHE_KEY = 'tariff_csv_cache_v1';
+        const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
 
-        function showStatus(msg, isError = false) {
-            statusEl.textContent = msg;
-            statusEl.style.display = 'block';
-            statusEl.style.backgroundColor = isError ? '#fee' : '#fffbeb';
-            statusEl.style.borderLeftColor = isError ? '#ef4444' : '#f59e0b';
+        let hsCodeData = [];
+        let isDataLoaded = false;
+
+        // ===== CSV LOADING WITH CACHE =====
+        function loadTariffData(callback) {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const { data, timestamp } = JSON.parse(cached);
+                    if (Date.now() - timestamp < CACHE_EXPIRY) {
+                        hsCodeData = JSON.parse(data);
+                        isDataLoaded = true;
+                        console.log("✓ Loaded from cache:", hsCodeData.length, "rows");
+                        if (callback) callback();
+                        return;
+                    }
+                } catch(e) { console.warn("Cache parse error:", e); }
+            }
+            
+            $('#loadingIndicator').show().html('<i class="fas fa-spinner fa-spin"></i> Loading tariff database...');
+            
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    hsCodeData = results.data.filter(row => row['HS_Code'] || row['hs_code']);
+                    isDataLoaded = true;
+                    
+                    // Save to cache
+                    try {
+                        localStorage.setItem(CACHE_KEY, JSON.stringify({
+                            data: JSON.stringify(hsCodeData),
+                            timestamp: Date.now()
+                        }));
+                    } catch(e) { console.warn("Cache save failed:", e); }
+                    
+                    $('#loadingIndicator').hide();
+                    console.log("✓ CSV loaded:", hsCodeData.length, "rows");
+                    if (callback) callback();
+                },
+                error: function(err) {
+                    $('#loadingIndicator').hide();
+                    $('#errorMessage').text('⚠️ Failed to load tariff data. Please check internet connection.').show();
+                    console.error("CSV fetch error:", err);
+                }
+            });
         }
 
-        async function loadTariffData() {
-            const url = document.getElementById('csvUrl').value.trim();
-            if (!url) {
-                showStatus("Please enter a valid CSV URL.", true);
+        // ===== HS CODE LOOKUP =====
+        function findHsCode(code) {
+            const search = code.toString().trim();
+            return hsCodeData.find(row => {
+                const hs = (row['HS_Code'] || row['hs_code'] || '').toString().trim();
+                return hs.startsWith(search) || hs === search;
+            });
+        }
+
+        $('#hsCode').on('input', function() {
+            const hsCode = $(this).val().trim();
+            $('#description').val('');
+            $('#errorMessage').hide();
+            
+            if (hsCode.length < 4 || !/^\d+$/.test(hsCode)) {
+                if (hsCode.length > 0) $('#errorMessage').text('Enter valid numeric HS Code (min 4 digits)').show();
                 return;
             }
 
-            try {
-                showStatus("Loading tariff data...");
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Failed to load CSV. Ensure the link is public and ends with /export?format=csv");
-                const csvText = await response.text();
-                tariffData = parseCSV(csvText);
-                enableInputs();
-                showStatus(`Loaded ${tariffData.length} tariff entries successfully!`, false);
-            } catch (err) {
-                console.error(err);
-                showStatus("Error: " + err.message, true);
+            if (!isDataLoaded) {
+                $('#loadingIndicator').show().html('<i class="fas fa-spinner fa-spin"></i> Loading...');
+                loadTariffData(() => lookupHsCode(hsCode));
+            } else {
+                lookupHsCode(hsCode);
+            }
+        });
+
+        function lookupHsCode(hsCode) {
+            const match = findHsCode(hsCode);
+            
+            if (match) {
+                const desc = match['Description'] || match['description'] || 'N/A';
+                const cdRate = parseFloat(match['CD_Rate'] || match['cd_rate'] || match['Customs_Duty'] || 0);
+                const vatRate = parseFloat(match['VAT_Rate'] || match['vat_rate'] || match['VAT'] || 15);
+                const unit = match['Unit'] || match['unit'] || 'PCS';
+                
+                $('#description').val(desc);
+                window.tariffData = { cdRate, vatRate, unit, isHighCD: cdRate > 25 };
+                $('#errorMessage').hide();
+                
+                // Show quantity field if high CD rate
+                if (window.tariffData.isHighCD) {
+                    showQuantityField(unit);
+                } else {
+                    $('#extraadditionalFields').empty();
+                }
+            } else {
+                $('#description').val('');
+                $('#errorMessage').text('HS Code not found. Please verify or try another code.').show();
+                window.tariffData = null;
+                $('#extraadditionalFields').empty();
             }
         }
 
-        function parseCSV(csv) {
-            const lines = csv.trim().split('\n');
-            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-            const data = [];
+        function showQuantityField(unit) {
+            $('#extraadditionalFields').html(`
+                <div class="outlined-field">
+                    <input type="number" id="quantity" name="quantity" min="1" placeholder=" " required>
+                    <label for="quantity">Number of Units</label>
+                </div>
+                <div class="outlined-field">
+                    <input type="text" id="unitDisplay" name="unitDisplay" value="${unit}" readonly>
+                    <label for="unitDisplay">Unit</label>
+                </div>
+            `);
+        }
 
-            // Map expected columns
-            const hsIndex = headers.indexOf('hs') !== -1 ? headers.indexOf('hs') :
-                            headers.indexOf('hscode') !== -1 ? headers.indexOf('hscode') : -1;
-            const descIndex = headers.findIndex(h => h.includes('desc') || h.includes('tarriff'));
-            const cdIndex = headers.indexOf('cd');
-            const sdIndex = headers.indexOf('sd');
-            const vatIndex = headers.indexOf('vat');
-            const aitIndex = headers.indexOf('ait');
-            const rdIndex = headers.indexOf('rd');
-            const atIndex = headers.indexOf('at');
+        // ===== TRADE TERMS DYNAMIC FIELDS =====
+        $('#tradeTerms').on('change', function() {
+            const tradeTerms = $(this).val();
+            const additionalFields = $('#additionalFields');
+            const extraFields = $('#extraadditionalFields');
+            additionalFields.empty();
+            if (!window.tariffData?.isHighCD) extraFields.empty();
+            else showQuantityField(window.tariffData.unit);
 
-            if (hsIndex === -1 || descIndex === -1) {
-                throw new Error("CSV must contain 'hs' and 'desc' columns.");
-            }
-
-            for (let i = 1; i < lines.length; i++) {
-                const row = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/); // Handle commas in quotes
-                if (row.length < Math.max(hsIndex, descIndex, cdIndex, sdIndex, vatIndex, aitIndex, rdIndex, atIndex) + 1) continue;
-
-                const hs = (row[hsIndex] || '').replace(/"/g, '').trim();
-                const desc = (row[descIndex] || '').replace(/"/g, '').trim();
-                if (!hs || !desc) continue;
-
-                data.push({
-                    hs,
-                    desc,
-                    cd: parseFloat(row[cdIndex]?.trim()) || 0,
-                    sd: parseFloat(row[sdIndex]?.trim()) || 0,
-                    vat: parseFloat(row[vatIndex]?.trim()) || 0,
-                    ait: parseFloat(row[aitIndex]?.trim()) || 0,
-                    rd: parseFloat(row[rdIndex]?.trim()) || 0,
-                    at: parseFloat(row[atIndex]?.trim()) || 0
+            if (tradeTerms === 'FOB') {
+                additionalFields.html(`
+                    <div class="outlined-field">
+                        <select id="freightType" name="freightType" required>
+                            <option value="" disabled selected> </option>
+                            <option value="ship">By Ship</option>
+                            <option value="air">By Air</option>
+                        </select>
+                        <label for="freightType">Freight Type</label>
+                    </div>
+                `);
+            } else if (tradeTerms === 'C&F') {
+                additionalFields.html(`
+                    <div class="outlined-field">
+                        <input type="number" id="cnfValue" name="cnfValue" step="0.01" min="0" placeholder=" " required>
+                        <label for="cnfValue">C&F Value (BDT)</label>
+                    </div>
+                    <div class="outlined-field">
+                        <input type="number" id="insurance" name="insurance" step="0.01" readonly placeholder=" ">
+                        <label for="insurance">Insurance (1% of C&F)</label>
+                    </div>
+                `);
+                $('#cnfValue').on('input', function() {
+                    const val = parseFloat($(this).val()) || 0;
+                    $('#insurance').val((val * 0.01).toFixed(2));
                 });
+            } else if (tradeTerms === 'CIF') {
+                additionalFields.html(`
+                    <div class="outlined-field">
+                        <input type="number" id="cifValue" name="cifValue" step="0.01" min="0" placeholder=" " required>
+                        <label for="cifValue">CIF Value (BDT)</label>
+                    </div>
+                `);
             }
-            return data;
-        }
+        });
 
-        function enableInputs() {
-            searchInput.disabled = false;
-            assessableValue.disabled = false;
-            calcBtn.disabled = false;
-        }
+        // Freight type handler for FOB
+        $(document).on('change', '#freightType', function() {
+            const freightType = $(this).val();
+            if (!freightType) return;
+            
+            const extraFields = $('#extraadditionalFields');
+            if (!window.tariffData?.isHighCD) extraFields.empty();
+            else showQuantityField(window.tariffData.unit);
+            
+            extraFields.append(`
+                <div class="outlined-field">
+                    <input type="number" id="fobValue" name="fobValue" step="0.01" min="0" placeholder=" " required>
+                    <label for="fobValue">FOB Value (BDT)</label>
+                </div>
+                <div class="outlined-field">
+                    <input type="number" id="freight" name="freight" step="0.01" readonly placeholder=" ">
+                    <label for="freight">Freight (<span id="freightRate">${freightType === 'ship' ? '20' : '15'}%)</span></label>
+                </div>
+            `);
 
-        function calculateTariff() {
-            const input = document.getElementById('searchInput').value.trim().toLowerCase();
-            const assessableValueNum = parseFloat(document.getElementById('assessableValue').value);
+            function updateCalculations() {
+                const fob = parseFloat($('#fobValue').val()) || 0;
+                if (fob > 0) {
+                    const rate = freightType === 'ship' ? 0.20 : 0.15;
+                    const freight = fob * rate;
+                    const insurance = (fob + freight) * 0.01;
+                    $('#freight').val(freight.toFixed(2));
+                    if (!$('#insurance').length) {
+                        // Add insurance field if not present
+                        $('#extraadditionalFields').append(`
+                            <div class="outlined-field">
+                                <input type="number" id="insurance" name="insurance" step="0.01" readonly placeholder=" ">
+                                <label for="insurance">Insurance (1%)</label>
+                            </div>
+                        `);
+                    }
+                    $('#insurance').val(insurance.toFixed(2));
+                } else {
+                    $('#freight').val('');
+                    $('#insurance').val('');
+                }
+            }
+            updateCalculations();
+            $('#fobValue').on('input', updateCalculations);
+        });
 
-            if (!input) {
-                alert("Please enter HS Code or Tariff Description.");
+        // ===== FORM SUBMIT & CALCULATION =====
+        $('#calculatorForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            if (!window.tariffData) {
+                $('#errorMessage').text('Please select a valid HS Code first').show();
                 return;
             }
-            if (isNaN(assessableValueNum) || assessableValueNum <= 0) {
-                alert("Please enter a valid Assessable Value.");
-                return;
+
+            const tradeTerms = $('#tradeTerms').val();
+            let baseValue = 0, freight = 0, insurance = 0;
+
+            if (tradeTerms === 'FOB') {
+                baseValue = parseFloat($('#fobValue').val()) || 0;
+                freight = parseFloat($('#freight').val()) || 0;
+                insurance = parseFloat($('#insurance').val()) || 0;
+            } else if (tradeTerms === 'C&F') {
+                baseValue = parseFloat($('#cnfValue').val()) || 0;
+                insurance = parseFloat($('#insurance').val()) || 0;
+            } else if (tradeTerms === 'CIF') {
+                baseValue = parseFloat($('#cifValue').val()) || 0;
             }
 
-            let item = null;
-            const cleanInput = input.replace(/\s/g, '');
+            // Calculate Assessable Value (AV)
+            const av = baseValue + freight + insurance;
+            
+            // Calculate Duties
+            const cd = av * (window.tariffData.cdRate / 100);
+            const vatBase = av + cd;
+            const vat = vatBase * (window.tariffData.vatRate / 100);
+            const total = av + cd + vat;
+            const quantity = parseFloat($('#quantity').val()) || 1;
+            const perUnit = total / quantity;
 
-            // Exact HS match
-            if (/^\d+$/.test(cleanInput)) {
-                item = tariffData.find(d => d.hs.replace(/\s/g, '') === cleanInput);
+            // Display Results
+            displayResults({
+                value_results: {
+                    "Assessable Value (AV)": av,
+                    `Customs Duty (${window.tariffData.cdRate}%)`: cd,
+                    `VAT (${window.tariffData.vatRate}%)`: vat,
+                    "Total Duty & Tax Payable": total,
+                    ...(quantity > 1 && { `Per Unit (${window.tariffData.unit})`: perUnit })
+                },
+                duty_details: {
+                    "HS Code": $('#hsCode').val(),
+                    "Description": $('#description').val(),
+                    "Trade Terms": tradeTerms,
+                    "Unit": window.tariffData.unit,
+                    "Quantity": quantity
+                }
+            });
+        });
+
+        // ===== DISPLAY RESULTS =====
+        function displayResults(results) {
+            const resultsDiv = $('#results');
+            resultsDiv.empty().show();
+
+            function formatKey(key) {
+                return key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase());
             }
 
-            // Fallback: description match
-            if (!item) {
-                item = tariffData.find(d =>
-                    d.desc.toLowerCase().includes(input) ||
-                    input.includes(d.hs.toLowerCase())
-                );
+            function createTable(data, title) {
+                let html = `<h4 class="mt-4 mb-3">${title}</h4><table class="table table-bordered"><thead><tr><th width="10%">SL</th><th>Particulars</th><th width="30%" class="text-end">Value (BDT)</th></tr></thead><tbody>`;
+                
+                let sl = 1;
+                const entries = Object.entries(data);
+                entries.forEach(([key, value], index) => {
+                    const isLast = index === entries.length - 1;
+                    const rowClass = isLast ? 'total-row' : '';
+                    const slCell = isLast ? '' : sl++;
+                    html += `<tr class="${rowClass}">
+                        <td class="text-center">${slCell}</td>
+                        <td>${formatKey(key)}</td>
+                        <td class="text-end fw-bold">${typeof value === 'number' ? value.toFixed(2) : value}</td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table>';
+                return html;
             }
 
-            const resultBox = document.getElementById('resultBox');
-            if (!item) {
-                resultBox.style.display = 'block';
-                document.getElementById('res-hscode').textContent = "—";
-                document.getElementById('res-desc').textContent = "No matching tariff found.";
-                document.getElementById('res-cd').textContent = "—";
-                document.getElementById('res-sd').textContent = "—";
-                document.getElementById('res-vat').textContent = "—";
-                document.getElementById('res-ait').textContent = "—";
-                document.getElementById('res-rd').textContent = "—";
-                document.getElementById('res-at').textContent = "—";
-                document.getElementById('res-total').textContent = "—";
-                document.getElementById('res-payable').textContent = "—";
-                return;
+            if (results.value_results) {
+                resultsDiv.append(createTable(results.value_results, "💰 Calculation Summary"));
+            }
+            if (results.duty_details) {
+                resultsDiv.append(createTable(results.duty_details, "📋 Import Details"));
             }
 
-            // Calculate taxes
-            const cdRate = item.cd || 0;
-            const sdVal = item.sd || 0;
-            const vatRate = item.vat || 0;
-            const aitRate = item.ait || 0;
-            const rdRate = item.rd || 0;
-            const atRate = item.at || 0;
-
-            const cdAmount = (cdRate / 100) * assessableValueNum;
-            const sdAmount = (sdVal > 100) ? sdVal : (sdVal / 100) * assessableValueNum;
-            const customsValue = assessableValueNum + cdAmount + sdAmount;
-            const vatAmount = (vatRate / 100) * customsValue;
-            const aitAmount = (aitRate / 100) * customsValue;
-            const rdAmount = (rdRate / 100) * customsValue;
-            const atAmount = (atRate / 100) * customsValue;
-
-            const totalTax = cdAmount + sdAmount + vatAmount + aitAmount + rdAmount + atAmount;
-            const totalPayable = assessableValueNum + totalTax;
-
-            // Display results
-            document.getElementById('res-hscode').textContent = item.hs;
-            document.getElementById('res-desc').textContent = item.desc;
-            document.getElementById('res-cd').textContent = `${cdRate}% → BDT ${cdAmount.toFixed(2)}`;
-            document.getElementById('res-sd').textContent = (sdVal > 100 ? `Fixed BDT ${sdVal}` : `${sdVal}%`) + ` → BDT ${sdAmount.toFixed(2)}`;
-            document.getElementById('res-vat').textContent = `${vatRate}% → BDT ${vatAmount.toFixed(2)}`;
-            document.getElementById('res-ait').textContent = `${aitRate}% → BDT ${aitAmount.toFixed(2)}`;
-            document.getElementById('res-rd').textContent = `${rdRate}% → BDT ${rdAmount.toFixed(2)}`;
-            document.getElementById('res-at').textContent = `${atRate}% → BDT ${atAmount.toFixed(2)}`;
-            document.getElementById('res-total').textContent = `BDT ${totalTax.toFixed(2)}`;
-            document.getElementById('res-payable').textContent = `BDT ${totalPayable.toFixed(2)}`;
-
-            resultBox.style.display = 'block';
+            // Scroll to results
+            $('html, body').animate({ scrollTop: resultsDiv.offset().top - 100 }, 500);
         }
+
+        // ===== INITIALIZE =====
+        // Load CSV on page load (non-blocking)
+        setTimeout(() => loadTariffData(), 500);
+
+        // Mobile menu toggle icon fix
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu) {
+            mobileMenu.addEventListener('show.bs.collapse', () => {
+                document.querySelector('[data-bs-target="#mobileMenu"] i').className = 'fas fa-times';
+            });
+            mobileMenu.addEventListener('hide.bs.collapse', () => {
+                document.querySelector('[data-bs-target="#mobileMenu"] i').className = 'fas fa-bars';
+            });
+        }
+    });
     </script>
 </body>
 </html>
